@@ -1,0 +1,71 @@
+---
+title: "SOK-1005-assignment-3"
+author: “Marte J. Skadssem Haetta Eikelmann”
+format: pdf
+echo: true
+output: true
+---
+
+### Preparing to answer the assignment:
+
+```{r}
+#removing all previous data to start on a clean sheet.
+
+rm(list=ls())
+
+
+#loading necessary packages.
+
+library(tidyverse)
+library(jsonlite)
+library(scales)
+```
+
+### Task 1
+
+```{r}
+#downloading data from the the web page.
+
+nytd_vaccination_rates = fromJSON("https://static01.nyt.com/newsgraphics/2021/12/20/us-coronavirus-deaths-2021/ff0adde21623e111d8ce103fedecf7ffc7906264/scatter.json")
+```
+
+```{r}
+#cheking the class of the data.
+
+class(nytd_vaccination_rates)
+```
+
+```{r}
+#plotting the data into a ggplot.
+
+nytd_vaccination_rates %>%
+  ggplot(aes(x=fully_vaccinated_pct_of_pop,y=deaths_per_100k, label=name)) + #defining the axis
+  geom_point(color="light blue") + #coloring the geom_points.
+  geom_text(hjust=1.2, size = 3, check_overlap = TRUE) + #put names to the geom_points and placing them.
+  scale_x_continuous(labels = scales::percent) + #scaling the x-values into percentage. 
+  labs(title="Covid-19 deaths since universal adult vaccine eligibility compared with vaccination rates",x="Share of total population fully vaccinated", y="20 avg. monthly deaths per 100,000") + #setting a title and and naming the x- and y-axis.
+  theme_light() #setting theme.
+```
+
+### Task 2
+
+```{r}
+#calculating a linear regression.
+
+lm(deaths_per_100k ~ fully_vaccinated_pct_of_pop, data=nytd_vaccination_rates)
+```
+
+*The two values showing after running the code can be interpreted as the "a" an "b" values in a linear function. This means that the y-intercept, or b-value, is 31,15. This can be translatet into saying that the function predicts that when there is no one vaccinated in the population (x equals to zero), there will be 31,15 deaths per 100,000. The b-value, -36,66, is showing the slope. If the vaccination rate (the x-value) of the population is 70 percent, the function predicts the death per 100,000 to be*
+
+*31,15 + (-36,66\*0,7) = 5,488.*
+
+```{r}
+nytd_vaccination_rates %>%
+  ggplot(aes(x=fully_vaccinated_pct_of_pop,y=deaths_per_100k, label=name)) +
+  geom_point(color="light blue") +
+  geom_smooth(method = lm) + #plotting the fitted linear function
+  geom_text(hjust=1.2, size = 3, check_overlap = TRUE) +
+  scale_x_continuous(labels = scales::percent) +
+  labs(title="Covid-19 deaths since universal adult vaccine eligibility compared with vaccination rates",x="Share of total population fully vaccinated", y="20 avg. monthly deaths per 100,000") +
+  theme_light()
+```
